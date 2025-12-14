@@ -1,0 +1,6 @@
+
+
+[database-config]
+db_url = "postgres://postgres:postgres@localhost:5432/brewrs"
+max_connections = 5
+migrations_dir = "./storage/migrations"

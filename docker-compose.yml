@@ -1,0 +1,41 @@
+services:
+  # The Database Service
+  db:
+    image: postgres:17-alpine
+    container_name: my_postgres_db
+    restart: unless-stopped
+    # Environment variables for creating the initial user/db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: brewrs
+    ports:
+      - "5432:5432"
+    volumes:
+      # 1. Persist data (so it survives container restarts)
+      - postgres_data:/var/lib/postgresql/data
+      # 2. Init scripts (run automatically on first startup)
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    # 3. Health Check (Modern Best Practice)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d brewrs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # (Optional) Web UI to manage your database
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: my_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

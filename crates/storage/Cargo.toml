@@ -1,0 +1,10 @@
+[package]
+name = "storage"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+toml = { workspace = true }
+sqlx = { workspace = true, features = ["postgres", "runtime-tokio"] }
+tracing = { workspace = true }

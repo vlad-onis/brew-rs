@@ -1,0 +1,19 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { workspace = true, features = ["http2"] }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+sqlx = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+toml = { workspace = true }
+
+
+# Local dependencies
+service = { workspace = true }
+storage = { workspace = true }
