@@ -1,21 +1,9 @@
 use axum::extract::Json;
-use serde::{Deserialize, Serialize};
 use tracing::debug;
 
-use brew_types::auth::{
-    common::{Email, Password},
-    sign_up::SignUpParams,
-};
+use brew_types::auth::sign_up::{SignUpParams, http::SignUpRequest};
 
 use realm::auth::sign_up::sign_up_handler;
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct SignUpRequest {
-    pub email: String,
-    pub password: String,
-    pub first_name: String,
-    pub last_name: String,
-}
 
 pub async fn sign_up(Json(request): Json<SignUpRequest>) -> &'static str {
     // todo: don't log PII in prod
@@ -29,13 +17,26 @@ pub async fn sign_up(Json(request): Json<SignUpRequest>) -> &'static str {
     "Sign up successful"
 }
 
-impl From<SignUpRequest> for SignUpParams {
-    fn from(http_request: SignUpRequest) -> Self {
-        SignUpParams {
-            first_name: http_request.first_name,
-            last_name: http_request.last_name,
-            email: Email::new(&http_request.email),
-            password: Password::new(http_request.password),
-        }
+#[cfg(test)]
+pub mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_sign_up_request_deserialization() {
+        let json = r#"{
+            "email": "test@example.com",
+            "password": "password",
+            "first_name": "John",
+            "last_name": "Doe"
+        }"#;
+
+        let request: SignUpRequest = serde_json::from_str(json).unwrap();
+        let params = SignUpParams::from(request);
+
+        assert_eq!(params.email, Email::new("test@example.com"));
+        assert_eq!(params.password, Password::new("password".to_string()));
+        assert_eq!(params.first_name, "John");
+        assert_eq!(params.last_name, "Doe");
     }
 }
