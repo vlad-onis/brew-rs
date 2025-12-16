@@ -6,3 +6,5 @@ pub struct SignUpParams {
     pub email: Email,
     pub password: Password,
 }
+
+pub struct SignUpResult;

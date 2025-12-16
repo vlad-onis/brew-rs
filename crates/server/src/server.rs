@@ -8,7 +8,7 @@ use service::auth::routes as auth_routes;
 #[derive(Debug, Error)]
 pub enum Error {}
 
-pub async fn run(config: Config) -> Result<(), Error> {
+pub async fn run(_config: Config) -> Result<(), Error> {
     info!("Starting server...");
 
     info!("Registering routes");

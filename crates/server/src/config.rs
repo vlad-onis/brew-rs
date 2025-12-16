@@ -41,5 +41,5 @@ pub async fn parse_config() -> Result<Config, Error> {
     info!("Parsing config");
     let config_file_path = config_path().await?;
     debug!("Config file path: {}", config_file_path.display());
-    Config::new(&PathBuf::from(config_file_path))
+    Config::new(&config_file_path)
 }

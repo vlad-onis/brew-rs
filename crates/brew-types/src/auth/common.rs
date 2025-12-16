@@ -26,4 +26,12 @@ impl From<&Email> for String {
     }
 }
 
-pub struct Password;
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct Password(String);
+
+impl Password {
+    pub fn new(password: String) -> Password {
+        Password(password)
+    }
+}

@@ -1,6 +1,5 @@
-use thiserror::Error;
-
 use brew_types::auth::{common::Email, sign_up::SignUpParams};
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -20,16 +19,16 @@ pub async fn check_email_already_exists(_email: &Email) -> Result<bool, Error> {
 pub async fn sign_up_handler(params: SignUpParams) -> Result<(), Error> {
     let email = params.email;
     if check_email_already_exists(&email).await? {
-        return Err(Error::EmailAlreadyExists(String::from(&email)));
+        Err(Error::EmailAlreadyExists(String::from(&email)))
     } else {
-        return Ok(());
+        Ok(())
     }
 }
 
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use crate::common::types::Email;
+    use brew_types::auth::common::Email;
 
     #[tokio::test]
     pub async fn test_check_email_already_exists() {

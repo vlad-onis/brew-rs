@@ -1,4 +1,4 @@
-use sqlx::postgres::{PgPool, PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 
 use crate::config::Config;

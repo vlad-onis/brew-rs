@@ -1,2 +1,2 @@
-pub mod db_migrator;
 pub mod config;
+pub mod db_migrator;
