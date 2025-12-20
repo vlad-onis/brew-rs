@@ -1,9 +1,8 @@
-mod config;
 mod server;
 
 use tracing::{debug, info};
 
-use config::parse_config;
+use realm::config::parse_config;
 use server::run;
 use storage::{config::Config as DbConfig, db_migrator};
 
@@ -23,14 +22,10 @@ async fn main() {
     debug!("Config: {:?}", config);
 
     run_migrations(config.database_config.clone()).await;
-    let _ = run(config).await;
 
-    // let router = Router::new()
-    //     .route("/", axum::routing::get(|| async { "Hello, world!" }))
-    //     .merge(auth_routes());
+    let context = realm::context::Context::new(config)
+        .await
+        .expect("Could not create context");
 
-    // info!("Starting the server");
-    // // run our app with hyper, listening globally on port 3000
-    // let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    // axum::serve(listener, router).await.unwrap();
+    let _ = run(context).await;
 }

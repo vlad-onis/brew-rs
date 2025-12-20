@@ -1,18 +1,23 @@
-use axum::extract::Json;
+use axum::extract::{Json, State};
 use tracing::debug;
 
 use brew_types::auth::sign_up::{SignUpParams, http::SignUpRequest};
 
-use realm::auth::sign_up::sign_up_handler;
+use realm::{auth::sign_up::sign_up_handler, context::Context};
 
-pub async fn sign_up(Json(request): Json<SignUpRequest>) -> &'static str {
+pub async fn sign_up(
+    State(context): State<Context>,
+    Json(request): Json<SignUpRequest>,
+) -> &'static str {
     // todo: don't log PII in prod
     debug!("Called sign_up with body: {:?}", request);
 
     let params = SignUpParams::from(request);
 
     // todo: error handling
-    sign_up_handler(params).await.expect("sign up failed");
+    sign_up_handler(params, context)
+        .await
+        .expect("sign up failed");
 
     "Sign up successful"
 }
