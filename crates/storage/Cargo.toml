@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+chrono = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features = ["derive"] }
 toml = { workspace = true }
-sqlx = { workspace = true, features = ["postgres", "runtime-tokio"] }
+sqlx = { workspace = true, features = ["postgres", "runtime-tokio", "chrono"] }
 tracing = { workspace = true }
+tokio = { workspace = true, features = ["full"] }

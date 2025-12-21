@@ -2,20 +2,20 @@ use axum::Router;
 use thiserror::Error;
 use tracing::info;
 
-use crate::config::Config;
+use realm::context::Context;
 use service::auth::routes as auth_routes;
 
 #[derive(Debug, Error)]
 pub enum Error {}
 
-pub async fn run(_config: Config) -> Result<(), Error> {
+pub async fn run(context: Context) -> Result<(), Error> {
     info!("Starting server...");
 
     info!("Registering routes");
 
     let router = Router::new()
         .route("/", axum::routing::get(|| async { "Hello, world!" }))
-        .merge(auth_routes());
+        .merge(auth_routes(context));
 
     info!("Starting the server");
     // run our app with hyper, listening globally on port 3000

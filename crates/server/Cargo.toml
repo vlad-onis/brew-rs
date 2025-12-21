@@ -17,3 +17,4 @@ toml = { workspace = true }
 # Local dependencies
 service = { workspace = true }
 storage = { workspace = true }
+realm = { workspace = true }
