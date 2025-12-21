@@ -26,6 +26,7 @@ pub async fn sign_up(
 pub mod tests {
 
     use super::*;
+    use brew_types::auth::common::{Email, Password};
 
     #[test]
     fn test_sign_up_request_deserialization() {
