@@ -3,9 +3,9 @@ use tracing::{error, info};
 
 use crate::context::Context;
 
-use super::password::{Error as HashingError, hash_password};
+use super::password::{Error as HashingError, verify_password};
 use brew_types::auth::login::LoginParams;
-use storage::users::{UserRow, get_user_by_email, insert_user};
+use storage::users::get_user_by_email;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -32,12 +32,7 @@ pub async fn login_handler(params: LoginParams, context: Context) -> Result<(), 
         return Err(Error::EmailDoesNotExist);
     };
 
-    let hashed_password = hash_password(params.password)?;
-
-    if hashed_password != user.password_hash {
-        error!("Password does not match");
-        return Err(Error::PasswordMissmatch);
-    }
+    verify_password(params.password, user.password_hash)?;
 
     Ok(())
 }
