@@ -1,7 +1,9 @@
+pub mod login_token;
+
 use thiserror::Error;
 use tracing::{error, info};
 
-use crate::context::Context;
+use crate::{auth::login::login_token::generate_token, context::Context};
 
 use super::password::{Error as HashingError, verify_password};
 use brew_types::auth::login::LoginParams;
@@ -17,24 +19,33 @@ pub enum Error {
     PasswordMissmatch,
     #[error("Email does not exist")]
     EmailDoesNotExist,
+    #[error("Token generation error: {0}")]
+    Token(#[from] login_token::Error),
 }
 
 /// Sign up a new user with the given email and password
-pub async fn login_handler(params: LoginParams, context: Context) -> Result<(), Error> {
+pub async fn login_handler(params: LoginParams, context: Context) -> Result<String, Error> {
     let email = params.email;
 
     info!(?email, "Signing up user with email");
 
     let mut conn = context.db.pool.acquire().await?;
 
+    info!(
+        "Verifying if email already exists: {}",
+        String::from(&email)
+    );
     let Ok(user) = get_user_by_email(String::from(&email), &mut *conn).await else {
         error!("Email {:?} does not exist", email);
         return Err(Error::EmailDoesNotExist);
     };
 
+    info!("Verifying password hash match");
+
     verify_password(params.password, user.password_hash)?;
 
-    Ok(())
+    // todo: remove that unwrap and handle the error
+    Ok(generate_token(user.id.unwrap())?)
 }
 
 // #[cfg(test)]

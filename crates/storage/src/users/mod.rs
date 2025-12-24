@@ -13,6 +13,7 @@ use tracing::debug;
 // );
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct UserRow {
+    pub id: Option<i64>,
     pub first_name: String,
     pub last_name: String,
     pub email: String,
