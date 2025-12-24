@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 use tracing::debug;
 // CREATE TABLE users (
 //     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -10,7 +11,7 @@ use tracing::debug;
 //     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 //     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 // );
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct UserRow {
     pub first_name: String,
     pub last_name: String,
@@ -46,23 +47,21 @@ where
     Ok(())
 }
 
-// pub async fn get_user_by_email<'e>(
-//     user: UserRow,
-//     connection: impl sqlx::PgExecutor<'e>,
-// ) -> Result<UserRow, sqlx::Error> {
-//     let query = sqlx::query(
-//         r#"
-//         SELECT * FROM users
-//         WHERE email = $1
-//         "#,
-//     );
+pub async fn get_user_by_email<'e>(
+    email: String,
+    connection: impl sqlx::PgExecutor<'e>,
+) -> Result<UserRow, sqlx::Error> {
+    let query = sqlx::query_as(
+        r#"
+        SELECT * FROM users
+        WHERE email = $1
+        "#,
+    );
 
-//     let user = query.bind(user.email).fetch_one(connection).await?;
+    let user = query.bind(email).fetch_one(connection).await?;
 
-//     println!("ID: {:?}", user);
-
-//     Ok(user)
-// }
+    Ok(user)
+}
 
 #[cfg(test)]
 pub mod tests {
@@ -85,5 +84,14 @@ pub mod tests {
         };
 
         insert_user(user, &pool).await.unwrap();
+
+        let user = get_user_by_email("test@test.com".to_string(), &pool)
+            .await
+            .unwrap();
+
+        assert_eq!(user.first_name, "John");
+        assert_eq!(user.last_name, "Doe");
+        assert_eq!(user.email, "test@test.com");
+        assert_eq!(user.password_hash, "password");
     }
 }
