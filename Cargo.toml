@@ -8,10 +8,12 @@ members = ["crates/*"]
 argon2 = "0.5.3"
 axum = { version = "0.8.7"}
 chrono = "0.4.42"
+hmac = "0.12.1"
 jwt = "0.16.0"
 sqlx = "0.8.6"
 serde = "1.0.228"
 serde_json = "1.0.145"
+sha2 = "0.10.9"
 thiserror = "2.0.17"
 tokio = { version = "1.48.0"}
 tracing = "0.1.43"

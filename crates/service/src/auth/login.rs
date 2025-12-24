@@ -1,18 +1,17 @@
 use axum::{
+    body::Body,
     extract::{Json, State},
-    http::StatusCode,
-    response::IntoResponse,
+    http::{StatusCode, header},
+    response::Response,
 };
-use tracing::debug;
+use serde_json::json;
+use tracing::{debug, error};
 
 use brew_types::auth::login::{LoginParams, http::LoginRequest};
 
 use realm::{auth::login::login_handler, context::Context};
 
-pub async fn login(
-    State(context): State<Context>,
-    Json(request): Json<LoginRequest>,
-) -> impl IntoResponse {
+pub async fn login(State(context): State<Context>, Json(request): Json<LoginRequest>) -> Response {
     // todo: don't log PII in prod
     debug!("Called sign_up with body: {:?}", request);
 
@@ -20,15 +19,43 @@ pub async fn login(
 
     let login_result = login_handler(params, context).await;
 
-    let (status, body) = match login_result {
-        Ok(_) => (StatusCode::OK, "login successful".to_string()),
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Login failed with error: {e}"),
-        ),
-    };
-
-    (status, body)
+    // todo: remove that expect statement
+    match login_result {
+        Ok(token) => {
+            let cookie_value = format!(
+                // expires in 15 days
+                // todo: change the hardcoded expiration
+                "auth_token={}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=1296000",
+                token
+            );
+            Response::builder()
+                .status(StatusCode::OK)
+                .header(header::CONTENT_TYPE, "application/json") // Inform client it's JSON
+                .header(header::SET_COOKIE, cookie_value) // The Critical Header
+                .body(Body::from(
+                    json!(
+                    {
+                        "message": "Login Successful"
+                    })
+                    .to_string(),
+                ))
+                .expect("Failed to create the response")
+        }
+        Err(e) => {
+            error!("Login failed with: {e}");
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    json!(
+                    {
+                        "message": "Login Failed"
+                    })
+                    .to_string(),
+                ))
+                .expect("Failed to create the response")
+        }
+    }
 }
 
 #[cfg(test)]

@@ -40,6 +40,7 @@ pub async fn sign_up_handler(params: SignUpParams, context: Context) -> Result<(
 
     insert_user(
         UserRow {
+            id: None,
             first_name: params.first_name,
             last_name: params.last_name,
             email: String::from(&email),
